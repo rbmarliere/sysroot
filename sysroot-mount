@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+
+[[ $# > 0 ]] || { echo 'usage: sysroot-mount path' && exit }
+[[ "$(mount | grep $1)" == "" ]] || exit
+[[ "$(/etc/init.d/qemu-binfmt status | grep started)" == "" ]] \
+    && /etc/init.d/qemu-binfmt start
+cp /etc/resolv.conf $1/etc/resolv.conf
+mkdir -p $1/proc && mount --bind /proc $1/proc
+mkdir -p $1/sys  && mount --bind /sys $1/sys
+mkdir -p $1/dev  && mount --bind /dev $1/dev
+

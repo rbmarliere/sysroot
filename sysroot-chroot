@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+
+[[ $# > 0 ]] || { echo 'usage: sysroot-chroot path' && exit }
+./sysroot-mount $1
+chroot $1 /bin/bash --login
