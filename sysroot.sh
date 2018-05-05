@@ -4,17 +4,17 @@ source $(dirname "$0")/prompt_input_yN/prompt_input_yN.sh
 
 sysroot_chroot()
 {
-    if [ $# -lt 2 ]; then
+    if [ $# -lt 1 ]; then
         printf "usage: sysroot-chroot path\n"
         return 1
     fi
-    sysroot_mount $1
+    sysroot_mount $1 || return 1
     chroot $1 /bin/sh --login
 }
 
 sysroot_mount()
 {
-    if [ $# -lt 2 ]; then
+    if [ $# -lt 1 ]; then
         printf "usage: sysroot-mount path\n"
         return 1
     fi
@@ -48,19 +48,19 @@ sysroot_install()
     fi
 
     if [ -d ${SYSROOT} ]; then
-        if prompt_input_yN "backup previous sysroot to ${SYSROOT}.old\n"; then
+        if prompt_input_yN "backup previous sysroot to ${SYSROOT}.old"; then
             mv ${SYSROOT} ${SYSROOT}.old
             mkdir -p ${SYSROOT}
         fi
     fi
 
-    if prompt_input_yN "download stage3-latest for ARM architecture\n"; then
+    if prompt_input_yN "download stage3-latest for ARM architecture"; then
         mkdir -p ${HOME}/Downloads
         [ -f ${STAGE_BALL} ] && mv ${STAGE_BALL} ${STAGE_BALL}.bak
         wget ${STAGE_URL} -O ${STAGE_BALL}
     fi
 
-    if prompt_input_yN "extract ${STAGE_BALL} in ${SYSROOT}\n"; then
+    if prompt_input_yN "extract ${STAGE_BALL} in ${SYSROOT}"; then
         mkdir -p ${SYSROOT}
         tar xpfv ${STAGE_BALL} -C ${SYSROOT}
     fi
@@ -147,7 +147,7 @@ EOF
         if [ ! -d /var/git/gentoo-vanilla ]; then
             git clone git://github.com/gentoo/gentoo.git /var/git/gentoo-vanilla
         fi
-        git --git-dir=/var/git/gentoo-vanilla/.git --work-tree=/var/git/gentoo-vanilla pull origin \
+        git --git-dir=/var/git/gentoo-vanilla/.git --work-tree=/var/git/gentoo-vanilla pull origin
         echo "gentoo-vanilla" > /var/git/gentoo-vanilla/profiles/repo_name
         cat > /etc/portage/repos.conf/gentoo-vanilla << EOF
 [gentoo-vanilla]
