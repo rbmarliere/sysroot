@@ -339,8 +339,7 @@ EOF
         fi
 
         SDCARD_ROOT_UUID=$(blkid -s UUID -o value ${SDCARD}p2)
-        printf "ro crypt_root=UUID=${SDCARD_ROOT_UUID} real_root=/dev/mapper/rpi-root dolvm rootfstype=ext4" > ${SYSROOT}/boot/cmdline.txt
-        #printf "ro dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 crypt_root=UUID=${SDCARD_ROOT_UUID} root=/dev/mapper/rpi-root dolvm rootfstype=ext4 elevator=deadline rootwait" > ${SYSROOT}/boot/cmdline.txt
+        printf "ro crypt_root=UUID=${SDCARD_ROOT_UUID} dolvm real_root=/dev/mapper/rpi-root root=/dev/mapper/rpi-root rootfstype=ext4" > ${SYSROOT}/boot/cmdline.txt
 
         if prompt_input_yN "use --delete on rsync for ${SDCARD} files"; then
             RSYNC_DELETE=--delete
