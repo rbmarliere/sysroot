@@ -297,6 +297,13 @@ EOF
         mkswap -L "swap" /dev/mapper/rpi-swap
         mkfs.ext4 /dev/mapper/rpi-root
         mkfs.vfat ${SDCARD}p1
+
+        export GPG_TTY=$(tty)
+        dd if=/dev/urandom bs=1024 count=512 | gpg --symmetric --cipher-algo AES256 --output ~/.ssh/rpi.gpg
+        echo RELOADAGENT | gpg-connect-agent
+        gpg --decrypt ~/.ssh/rpi.gpg > rpi
+        cryptsetup luksAddKey ${SDCARD}p2 rpi
+        shred -u rpi
     fi
 
     if prompt_input_yN "deploy ${SYSROOT} to ${SDCARD}"; then
