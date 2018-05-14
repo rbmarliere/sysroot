@@ -35,6 +35,11 @@ sysroot_mount()
 
 sysroot_install()
 {
+    if [ $(id -u) -ne 0 ]; then
+        printf "error: must run as root\n"
+        return 1;
+    fi
+
     CFLAGS="-O2 -pipe -march=armv7-a -mtune=cortex-a53 -mfpu=neon-vfpv4 -mfloat-abi=hard"
     CTARGET=armv7a-hardfloat-linux-gnueabi
     SDCARD=/dev/mmcblk0
