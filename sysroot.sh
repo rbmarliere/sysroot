@@ -344,7 +344,12 @@ EOF
         if prompt_input_yN "use --delete on rsync for ${SDCARD} files"; then
             RSYNC_DELETE=--delete
         fi
-        rsync -avr --exclude ${RSYNC_DELETE} "var/git/*" ${SYSROOT}/ /mnt/rpi/
+        rsync --archive \
+              --verbose \
+              --recursive \
+              --exclude "var/git/*" \
+            ${RSYNC_DELETE} \
+            ${SYSROOT}/ /mnt/rpi/
 
         umount /mnt/rpi/boot
         umount /mnt/rpi
