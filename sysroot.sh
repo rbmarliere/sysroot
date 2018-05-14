@@ -180,28 +180,32 @@ EOF
         rm -f /etc/portage/repos.conf/{crossdev,gentoo}
     fi
 
-    if prompt_input_yN "clean and update sources from raspberrypi/linux"; then
-        if [ ! -d /usr/src/linux-rpi-vanilla ]; then
-            git clone https://github.com/raspberrypi/linux.git /usr/src/linux-rpi-vanilla
-        fi
-        git --git-dir=/usr/src/linux-rpi-vanilla/.git --work-tree=/usr/src/linux-rpi-vanilla clean -fdx
-        git --git-dir=/usr/src/linux-rpi-vanilla/.git --work-tree=/usr/src/linux-rpi-vanilla checkout master
-        git --git-dir=/usr/src/linux-rpi-vanilla/.git --work-tree=/usr/src/linux-rpi-vanilla fetch --all
-        git --git-dir=/usr/src/linux-rpi-vanilla/.git --work-tree=/usr/src/linux-rpi-vanilla branch -D rpi-4.9.y
-        git --git-dir=/usr/src/linux-rpi-vanilla/.git --work-tree=/usr/src/linux-rpi-vanilla checkout rpi-4.9.y
+    if [ ! -d ${SYSROOT}/usr/src/linux ]; then
+        git clone https://github.com/raspberrypi/linux.git ${SYSROOT}/usr/src/linux
+    fi
 
-        if [ -f /etc/kernels/kernel-config-arm ]; then
-            cp /etc/kernels/kernel-config-arm /usr/src/linux-rpi-vanilla/.config
-        fi
+    if prompt_input_yN "clean and update sources from raspberrypi/linux"; then
+        git --git-dir=${SYSROOT}/usr/src/linux/.git --work-tree=${SYSROOT}/usr/src/linux clean -fdx
+        git --git-dir=${SYSROOT}/usr/src/linux/.git --work-tree=${SYSROOT}/usr/src/linux checkout master
+        git --git-dir=${SYSROOT}/usr/src/linux/.git --work-tree=${SYSROOT}/usr/src/linux fetch --all
+        git --git-dir=${SYSROOT}/usr/src/linux/.git --work-tree=${SYSROOT}/usr/src/linux branch -D rpi-4.9.y
+        git --git-dir=${SYSROOT}/usr/src/linux/.git --work-tree=${SYSROOT}/usr/src/linux checkout rpi-4.9.y
+    fi
+
+    if [ -f ${SYSROOT}/etc/kernels/arm.default ]; then
+        cp ${SYSROOT}/etc/kernels/arm.default ${SYSROOT}/usr/src/linux/.config
+    else
+        mkdir -p ${SYSROOT}/etc/kernels
+        cp ${dirname}/arm.default ${SYSROOT}/etc/kernels
     fi
 
     nproc=$(nproc)
     pwd=$(pwd)
-    if [ ! -d /usr/src/linux-rpi-vanilla ]; then
-        printf "error: no sources found in /usr/src/linux-rpi-vanilla"
+    if [ ! -d ${SYSROOT}/usr/src/linux ]; then
+        printf "error: no sources found in ${SYSROOT}/usr/src/linux\n"
         return 1
     fi
-    cd /usr/src/linux-rpi-vanilla
+    cd ${SYSROOT}/usr/src/linux
     if prompt_input_yN "make bcm2709_defconfig"; then
         make -j${nproc} \
         ARCH=arm \
@@ -236,7 +240,7 @@ EOF
         scripts/mkknlimg arch/arm/boot/zImage ${SYSROOT}/boot/kernel7.img
 
         if prompt_input_yN "save new kernel config to /etc/kernels"; then
-            cp .config /etc/kernels/kernel-config-arm
+            cp .config ${SYSROOT}/etc/kernels/arm.default
         fi
     fi
     cd ${pwd}
