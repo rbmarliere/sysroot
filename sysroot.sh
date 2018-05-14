@@ -152,14 +152,14 @@ EOF
     fi
 
     if prompt_input_yN "build cross-${CTARGET} toolchain"; then
-        if [ ! -d /var/git/gentoo-vanilla ]; then
-            git clone git://github.com/gentoo/gentoo.git /var/git/gentoo-vanilla
+        if [ ! -d /var/git/gentoo ]; then
+            git clone git://github.com/gentoo/gentoo.git /var/git/gentoo
         fi
-        git --git-dir=/var/git/gentoo-vanilla/.git --work-tree=/var/git/gentoo-vanilla pull origin
-        echo "gentoo-vanilla" > /var/git/gentoo-vanilla/profiles/repo_name
-        cat > /etc/portage/repos.conf/gentoo-vanilla << EOF
-[gentoo-vanilla]
-location = /var/git/gentoo-vanilla
+        git --git-dir=/var/git/gentoo/.git --work-tree=/var/git/gentoo pull origin
+        echo "gentoo" > /var/git/gentoo/profiles/repo_name
+        cat > /etc/portage/repos.conf/gentoo << EOF
+[gentoo]
+location = /var/git/gentoo
 sync-type = git
 sync-uri = git://github.com/gentoo/gentoo.git
 auto-sync = no
@@ -167,7 +167,7 @@ EOF
         cat > /etc/portage/repos.conf/crossdev << EOF
 [crossdev]
 location = /var/git/crossdev
-masters = gentoo-vanilla
+masters = gentoo
 auto-sync = no
 use-manifests = true
 thin-manifests = true
@@ -177,7 +177,7 @@ EOF
         echo "crossdev" > /var/git/crossdev/profiles/repo_name
         rm -rf /var/git/crossdev/cross-${CTARGET}
         crossdev -S -oO /var/git/crossdev/ -t ${CTARGET}
-        rm -f /etc/portage/repos.conf/{crossdev,gentoo-vanilla}
+        rm -f /etc/portage/repos.conf/{crossdev,gentoo}
     fi
 
     if prompt_input_yN "clean and update sources from raspberrypi/linux"; then
