@@ -249,7 +249,7 @@ EOF
         if [ ! -d /usr/src/firmware-nonfree ]; then
             git clone --depth 1 https://github.com/RPi-Distro/firmware-nonfree /usr/src/firmware-nonfree
         fi
-        git --git-dir=/usr/src/firmware-nonfree/.git --work-tree=/usr/src/linux-rpi-vanilla pull origin \
+        git --git-dir=/usr/src/firmware-nonfree/.git --work-tree=/usr/src/firmware-nonfree pull origin \
         mkdir -p ${SYSROOT}/lib/firmware/brcm
         find /usr/src/firmware-nonfree/ -name 'brcmfmac43430-sdio.*' -exec cp {} ${SYSROOT}/lib/firmware/brcm/ \;
     fi
