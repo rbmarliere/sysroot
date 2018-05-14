@@ -10,6 +10,9 @@ sysroot_chroot()
     fi
     sysroot_mount $1 || return 1
     chroot $1 /bin/sh --login
+    umount $1/dev
+    umount $1/proc
+    umount $1/sys
 }
 
 sysroot_mount()
@@ -25,9 +28,9 @@ sysroot_mount()
         /etc/init.d/qemu-binfmt start
     fi
     cp /etc/resolv.conf $1/etc/resolv.conf
+    mkdir -p $1/dev  && mount --bind /dev $1/dev
     mkdir -p $1/proc && mount --bind /proc $1/proc
     mkdir -p $1/sys  && mount --bind /sys $1/sys
-    mkdir -p $1/dev  && mount --bind /dev $1/dev
 }
 
 sysroot_install()
