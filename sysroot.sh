@@ -356,5 +356,30 @@ EOF
         vgchange --available n rpi
         cryptsetup luksClose rpi
     fi
+
+    if [ "$(grep 'Host dropbear' ~/.ssh/config || grep 'Host rpi' ~/.ssh/config)" = "" ]; then
+        if prompt_input_yN "add dropbear and rpi hosts to ~/.ssh/config"; then
+            mkdir -p ~/.ssh
+            printf "what is the hostname? "
+            read ip
+            cat >> ~/.ssh/config << EOF
+Host dropbear
+    Hostname ${ip}
+    UserKnownHostsFile ~/.ssh/known_hosts.dropbear
+    IdentityFile ~/.ssh/id_dropbear
+    User root
+EOF
+            cat >> ~/.ssh/config << EOF
+Host rpi
+    Hostname ${ip}
+    UserKnownHostsFile ~/.ssh/known_hosts.rpi
+    IdentityFile ~/.ssh/id_rpi
+    User root
+EOF
+        fi
+    fi
+
+    printf "use this to unlock the root:\n"
+    printf "cat ~/.ssh/rpi.gpg | ssh dropbear post root; ssh dropbear\n\n"
 }
 
