@@ -83,16 +83,11 @@ sysroot_install()
     done
 
     if prompt_input_yN "merge app-emulation/qemu"; then
-        if [ ! -d /etc/portage/package.use ]; then
-            printf 'error: convert /etc/portage/package.use to a directory'
-            return 1
-        else
-            printf 'app-emulation/qemu static-user' > /etc/portage/package.use/qemu
-            printf 'dev-libs/libpcre static-libs' >> /etc/portage/package.use/qemu
-            printf 'sys-apps/attr static-libs' >> /etc/portage/package.use/qemu
-            printf 'dev-libs/glib static-libs' >> /etc/portage/package.use/qemu
-            printf 'sys-libs/zlib static-libs' >> /etc/portage/package.use/qemu
-        fi
+        printf 'app-emulation/qemu static-user' > /etc/portage/package.use/qemu
+        printf 'dev-libs/libpcre static-libs' >> /etc/portage/package.use/qemu
+        printf 'sys-apps/attr static-libs' >> /etc/portage/package.use/qemu
+        printf 'dev-libs/glib static-libs' >> /etc/portage/package.use/qemu
+        printf 'sys-libs/zlib static-libs' >> /etc/portage/package.use/qemu
         if [ "$(grep QEMU_SOFT_MMU_TARGETS /etc/portage/make.conf)" = "" ]; then
             printf 'QEMU_SOFTMMU_TARGETS="arm"' >> /etc/portage/make.conf
         fi
