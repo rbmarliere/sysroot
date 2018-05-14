@@ -306,6 +306,14 @@ EOF
         shred -u rpi
     fi
 
+    if [ ! -e ~/.ssh/id_rpi ]; then
+        ssh-keygen -f ~/.ssh/id_rpi -t rsa -N ''
+    fi
+    if [ ! -d ${SYSROOT}/root/.ssh ]; then
+        mkdir -p ${SYSROOT}/root/.ssh
+        ssh-keygen -y -f ~/.ssh/id_rpi > ${SYSROOT}/root/.ssh/authorized_keys
+    fi
+
     if prompt_input_yN "deploy ${SYSROOT} to ${SDCARD}"; then
         if [ "$(cryptsetup status rpi | grep 'is active')" = "" ]; then
             cryptsetup luksOpen ${SDCARD}p2 rpi
