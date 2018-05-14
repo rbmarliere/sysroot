@@ -111,25 +111,30 @@ sysroot_install()
 passwd
 printf '/dev/mapper/rpi-root    /           ext4    defaults,noatime,errors=remount-ro,discard   0 1' >  /etc/fstab
 printf '/dev/mapper/rpi-swap    none        swap    defaults,noatime,discard                     0 0' >> /etc/fstab
+echo "app-crypt/gnupg static" > /etc/portage/package.use
+echo "sys-apps/util-linux static-libs" >> /etc/portage/package.use
+echo "sys-fs/cryptsetup static-libs" >> /etc/portage/package.use
+echo "sys-fs/lvm2 static static-libs" >> /etc/portage/package.use
+echo "sys-libs/e2fsprogs-libs static-libs" >> /etc/portage/package.use
+echo "=sys-kernel/genkernel-3.4.40.23 **" >> /etc/portage/package.accept_keywords
 ego sync
-emerge -a cryptsetup genkernel dropbear raspberrypi-firmware networkmanager wireless-tools lvm2
+sed -e 's/VERSION_GPG=\'1.4.11\'/VERSION_GPG=\'1.4.21\'/g' /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild > /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild.
+mv /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild. /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild
+ebuild /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild manifest
+emerge -a "=app-crypt/gnupg-1.4.21" "=sys-kernel/genkernel-3.4.40.23" net-misc/dropbear net-misc/networkmanager net-misc/ntp net-wireless/wireless-tools sys-fs/cryptsetup sys-fs/lvm2 sys-kernel/raspberrypi-firmware
 dispatch-conf
-emerge -a cryptsetup genkernel dropbear raspberrypi-firmware networkmanager wireless-tools lvm2
+emerge "=app-crypt/gnupg-1.4.21" "=sys-kernel/genkernel-3.4.40.23" net-misc/dropbear net-misc/networkmanager net-misc/ntp net-wireless/wireless-tools sys-fs/cryptsetup sys-fs/lvm2 sys-kernel/raspberrypi-firmware
+sed -e 's/GPG_VER="1.4.11"/GPG_VER="1.4.21"/g' /etc/genkernel.conf > /etc/genkernel.conf.
+mv /etc/genkernel.conf. /etc/genkernel.conf
 rc-update add NetworkManager default
 rc-update add sshd default
 rc-update add swclock boot
 rc-update del hwclock boot
-rm -f /etc/dropbear
-mkdir -p /etc/dropbear
-dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key
-dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key
-dropbearkey -t ecdsa -f /etc/dropbear/dropbear_ecdsa_host_key
-printf '' > /etc/dropbear/authorized_keys
-chmod 700 /etc/dropbear
+rc-update add ntp-client default
 EOF
             chmod +x ${SYSROOT}/prepare.sh
         fi
-        chroot ${SYSROOT} /bin/bash -c "/bin/bash /prepare.sh"
+        chroot ${SYSROOT} /bin/sh -c "/bin/sh /prepare.sh"
         rm ${SYSROOT}/prepare.sh
     fi
 
