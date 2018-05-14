@@ -1,6 +1,7 @@
 #!/bin/sh
 
-source $(dirname "$0")/prompt_input_yN/prompt_input_yN.sh
+dirname=$(dirname "$0")
+source ${dirname}/prompt_input_yN/prompt_input_yN.sh
 
 sysroot_chroot()
 {
@@ -256,12 +257,14 @@ EOF
 
     if prompt_input_yN "build initramfs"; then
         rm -f ${SYSROOT}/boot/*initramfs*
-        rsync -avr --delete /usr/src/linux-rpi-vanilla/ ${SYSROOT}/usr/src/linux-rpi-vanilla/
-        [ -L ${SYSROOT}/usr/src/linux ] && unlink ${SYSROOT}/usr/src/linux
-        ln -s linux-rpi-vanilla ${SYSROOT}/usr/src/linux
+        patch /usr/share/genkernel/defaults/initrd.scripts ${dirname}/initrd.scripts.patch
+        patch /usr/share/genkernel/defaults/login-remote.sh ${dirname}/login-remote.sh.patch
         sed -e 's/#SSH="no"/SSH="YES"/g' ${SYSROOT}/etc/genkernel.conf > ${SYSROOT}/etc/genkernel.conf.
         mv ${SYSROOT}/etc/genkernel.conf. ${SYSROOT}/etc/genkernel.conf
-        chroot ${SYSROOT} /bin/sh -c "genkernel --no-mountboot --lvm --luks --kernel-config=/usr/src/linux/.config initramfs"
+        [ ! -f ~/.ssh/id_dropbear ] && ssh-keygen -f ~/.ssh/id_dropbear -t rsa -N ''
+        ssh-keygen -y -f ~/.ssh/id_dropbear > ${SYSROOT}/etc/dropbear/authorized_keys
+        chroot ${SYSROOT} /bin/sh -c "genkernel --no-mountboot --gpg --lvm --luks --disklabel --kerneldir=/usr/src/linux --kernel-config=/usr/src/linux/.config initramfs"
+        printf "\n* Use ~/.ssh/id_dropbear to ssh into the initramfs.\n"
         initramfs=$(ls ${SYSROOT}/boot | grep initramfs)
         printf "initramfs ${initramfs} followkernel" > ${SYSROOT}/boot/config.txt
     fi
