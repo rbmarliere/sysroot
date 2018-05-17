@@ -112,27 +112,29 @@ sysroot_install()
 passwd
 printf '/dev/mapper/rpi-root    /           ext4    defaults,noatime,errors=remount-ro,discard   0 1' >  /etc/fstab
 printf '/dev/mapper/rpi-swap    none        swap    defaults,noatime,discard                     0 0' >> /etc/fstab
+echo "=sys-kernel/genkernel-3.4.40.23 **" > /etc/portage/package.accept_keywords
 echo ">app-crypt/gnupg-1" > /etc/portage/package.mask
 echo "app-crypt/gnupg static" > /etc/portage/package.use
 echo "sys-apps/util-linux static-libs" >> /etc/portage/package.use
 echo "sys-fs/cryptsetup static-libs" >> /etc/portage/package.use
 echo "sys-fs/lvm2 static static-libs" >> /etc/portage/package.use
 echo "sys-libs/e2fsprogs-libs static-libs" >> /etc/portage/package.use
-echo "=sys-kernel/genkernel-3.4.40.23 **" >> /etc/portage/package.accept_keywords
 ego sync
 sed -e 's/VERSION_GPG=\'1.4.11\'/VERSION_GPG=\'1.4.21\'/g' /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild > /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild.
 mv /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild. /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild
 ebuild /var/git/meta-repo/kits/core-kit/sys-kernel/genkernel/genkernel-3.4.40.23.ebuild manifest
-emerge -a "=app-crypt/gnupg-1.4.21" "=sys-kernel/genkernel-3.4.40.23" net-misc/dropbear net-misc/networkmanager net-misc/ntp net-wireless/wireless-tools sys-fs/cryptsetup sys-fs/lvm2 sys-kernel/raspberrypi-firmware
-dispatch-conf
-emerge "=app-crypt/gnupg-1.4.21" "=sys-kernel/genkernel-3.4.40.23" net-misc/dropbear net-misc/networkmanager net-misc/ntp net-wireless/wireless-tools sys-fs/cryptsetup sys-fs/lvm2 sys-kernel/raspberrypi-firmware
+emerge "=sys-kernel/genkernel-3.4.40.23" "=app-crypt/gnupg-1.4.21" app-admin/sudo app-editors/vim app-misc/tmux app-shells/zsh  net-misc/dropbear net-misc/networkmanager net-misc/ntp net-wireless/wireless-tools sys-fs/cryptsetup sys-fs/lvm2
 sed -e 's/GPG_VER="1.4.11"/GPG_VER="1.4.21"/g' /etc/genkernel.conf > /etc/genkernel.conf.
 mv /etc/genkernel.conf. /etc/genkernel.conf
+git clone https://github.com/raspberrypi/linux.git /usr/src/linux
+git clone --depth 1 git://github.com/raspberrypi/firmware/ /usr/src/firmware
+cp -r firmware/boot/* /boot
+cp -r firmware/modules /lib
 rc-update add NetworkManager default
+rc-update add ntp-client default
 rc-update add sshd default
 rc-update add swclock boot
 rc-update del hwclock boot
-rc-update add ntp-client default
 EOF
             chmod +x ${SYSROOT}/prepare.sh
         fi
@@ -182,10 +184,6 @@ EOF
         rm -f /etc/portage/repos.conf/{crossdev,gentoo}
     fi
 
-    if [ ! -d ${SYSROOT}/usr/src/linux ]; then
-        git clone https://github.com/raspberrypi/linux.git ${SYSROOT}/usr/src/linux
-    fi
-
     if prompt_input_yN "clean and update sources from raspberrypi/linux"; then
         git --git-dir=${SYSROOT}/usr/src/linux/.git --work-tree=${SYSROOT}/usr/src/linux clean -fdx
         git --git-dir=${SYSROOT}/usr/src/linux/.git --work-tree=${SYSROOT}/usr/src/linux checkout master
@@ -214,7 +212,6 @@ EOF
         CROSS_COMPILE=${CTARGET}- \
         bcm2709_defconfig
     fi
-
     if prompt_input_yN "make menuconfig"; then
         make -j${nproc} \
         ARCH=arm \
@@ -222,7 +219,6 @@ EOF
         MENUCONFIG_COLOR=mono \
         menuconfig
     fi
-
     if prompt_input_yN "build kernel"; then
         make -j${nproc} \
         ARCH=arm \
