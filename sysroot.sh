@@ -243,13 +243,13 @@ EOF
     fi
     cd ${pwd}
 
-    if prompt_input_yN "copy non-free firmware for brcm"; then
+    if prompt_input_yN "copy non-free wifi firmware for brcm"; then
         if [ ! -d /usr/src/firmware-nonfree ]; then
-            git clone --depth 1 https://github.com/RPi-Distro/firmware-nonfree /usr/src/firmware-nonfree
+            git clone --depth 1 https://github.com/RPi-Distro/firmware-nonfree ${SYSROOT}/usr/src/firmware-nonfree
         fi
-        git --git-dir=/usr/src/firmware-nonfree/.git --work-tree=/usr/src/firmware-nonfree pull origin \
+        git --git-dir=${SYSROOT}/usr/src/firmware-nonfree/.git --work-tree=${SYSROOT}/usr/src/firmware-nonfree pull origin \
         mkdir -p ${SYSROOT}/lib/firmware/brcm
-        find /usr/src/firmware-nonfree/ -name 'brcmfmac43430-sdio.*' -exec cp {} ${SYSROOT}/lib/firmware/brcm/ \;
+        cp -r ${SYSROOT}/usr/src/firmware-nonfree/brcm/* ${SYSROOT}/lib/firmware/brcm
     fi
 
     if prompt_input_yN "build initramfs"; then
