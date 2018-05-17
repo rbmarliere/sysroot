@@ -113,7 +113,7 @@ passwd
 printf '/dev/mapper/rpi-root    /           ext4    defaults,noatime,errors=remount-ro,discard   0 1' >  /etc/fstab
 printf '/dev/mapper/rpi-swap    none        swap    defaults,noatime,discard                     0 0' >> /etc/fstab
 echo "=sys-kernel/genkernel-3.4.40.23 **" > /etc/portage/package.accept_keywords
-echo ">app-crypt/gnupg-1" > /etc/portage/package.mask
+echo ">app-crypt/gnupg-2" > /etc/portage/package.mask
 echo "app-crypt/gnupg static" > /etc/portage/package.use
 echo "sys-apps/util-linux static-libs" >> /etc/portage/package.use
 echo "sys-fs/cryptsetup static-libs" >> /etc/portage/package.use
