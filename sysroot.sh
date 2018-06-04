@@ -200,7 +200,6 @@ EOF
     fi
 
     nproc=$(nproc)
-    pwd=$(pwd)
     if [ ! -d ${SYSROOT}/usr/src/linux ]; then
         printf "error: no sources found in ${SYSROOT}/usr/src/linux\n"
         return 1
@@ -241,7 +240,7 @@ EOF
             cp .config ${SYSROOT}/etc/kernels/arm.default
         fi
     fi
-    cd ${pwd}
+    cd -
 
     if prompt_input_yN "copy non-free wifi firmware for brcm"; then
         if [ ! -d /usr/src/firmware-nonfree ]; then
